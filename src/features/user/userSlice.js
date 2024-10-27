@@ -10,6 +10,7 @@ export const loginWithEmail = createAsyncThunk(
     try {
       const response = await api.post("/auth/login", { email, password });
       // loginPage에서 user가 있으면 홈화면으로 가는 로직 처리 했음
+      sessionStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
       // 실패 시 생긴 에러 값을 reducer에 저장
@@ -23,7 +24,13 @@ export const loginWithGoogle = createAsyncThunk(
   async (token, { rejectWithValue }) => {}
 );
 
-export const logout = () => (dispatch) => {};
+export const logout = () => (dispatch) => {
+  sessionStorage.removeItem("token");
+  dispatch(userSlice.actions.clearUser());
+  dispatch(
+    showToastMessage({ message: "로그아웃 되었습니다.", status: "info" })
+  );
+};
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (
@@ -54,7 +61,14 @@ export const registerUser = createAsyncThunk(
 
 export const loginWithToken = createAsyncThunk(
   "user/loginWithToken",
-  async (_, { rejectWithValue }) => {}
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/user/me");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
 );
 
 const userSlice = createSlice({
@@ -70,6 +84,9 @@ const userSlice = createSlice({
     clearErrors: (state) => {
       state.loginError = null;
       state.registrationError = null;
+    },
+    clearUser: (state) => {
+      state.user = null;
     },
   },
   extraReducers: (builder) => {
@@ -90,14 +107,16 @@ const userSlice = createSlice({
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        sessionStorage.setItem("token", action.payload.token);
         state.loginError = null;
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
+      })
+      .addCase(loginWithToken.fulfilled, (state, action) => {
+        state.user = action.payload.user;
       });
   },
 });
-export const { clearErrors } = userSlice.actions;
+export const { clearErrors, clearUser } = userSlice.actions;
 export default userSlice.reducer;

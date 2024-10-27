@@ -11,6 +11,7 @@ const api = axios.create({
     "Content-Type": "application/json",
     authorization: `Bearer ${sessionStorage.getItem("token")}`,
   },
+  withCredentials: true,
 });
 /**
  * console.log all requests and responses
