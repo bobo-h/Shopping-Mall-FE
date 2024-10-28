@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
@@ -20,6 +20,7 @@ const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [policyError, setPolicyError] = useState(false);
   const { registrationError } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(false);
 
   const register = (event) => {
     event.preventDefault();
@@ -35,7 +36,10 @@ const RegisterPage = () => {
     }
     setPasswordError("");
     setPolicyError(false);
-    dispatch(registerUser({ name, email, password, navigate }));
+    setLoading(true);
+    dispatch(registerUser({ name, email, password, navigate })).finally(() =>
+      setLoading(false)
+    );
   };
 
   const handleChange = (event) => {
@@ -114,8 +118,8 @@ const RegisterPage = () => {
             checked={formData.policy}
           />
         </Form.Group>
-        <Button variant="danger" type="submit">
-          회원가입
+        <Button variant="danger" type="submit" disabled={loading}>
+          {loading ? <Spinner animation="border" size="sm" /> : "회원가입"}
         </Button>
       </Form>
     </Container>

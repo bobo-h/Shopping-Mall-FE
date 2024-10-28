@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
@@ -15,19 +15,26 @@ const Login = () => {
   const { user, loginError } = useSelector((state) => state.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (loginError) {
       dispatch(clearErrors());
     }
-  }, [navigate]);
+  }, [navigate, dispatch, loginError]);
+
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
-    dispatch(loginWithEmail({ email, password }));
+    setLoading(true);
+    dispatch(loginWithEmail({ email, password })).finally(() =>
+      setLoading(false)
+    );
   };
 
   const handleGoogleLogin = async (googleData) => {
+    setLoading(true);
     //구글 로그인 하기
+    dispatch(loginWithGoogle(googleData)).finally(() => setLoading(false));
   };
 
   if (user) {
@@ -62,8 +69,8 @@ const Login = () => {
             />
           </Form.Group>
           <div className="display-space-between login-button-area">
-            <Button variant="danger" type="submit">
-              Login
+            <Button variant="danger" type="submit" disabled={loading}>
+              {loading ? <Spinner animation="border" size="sm" /> : "Login"}
             </Button>
             <div>
               아직 계정이 없으세요?<Link to="/register">회원가입 하기</Link>{" "}
@@ -79,6 +86,7 @@ const Login = () => {
                   onError={() => {
                     console.log("Login Failed");
                   }}
+                  disabled={loading}
                 />
               </GoogleOAuthProvider>
             </div>
