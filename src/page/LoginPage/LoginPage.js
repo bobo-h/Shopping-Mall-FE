@@ -19,9 +19,12 @@ const Login = () => {
 
   useEffect(() => {
     if (loginError) {
-      dispatch(clearErrors());
+      setLoading(false); // 로그인 실패 시 로딩 종료
     }
-  }, [navigate, dispatch, loginError]);
+    if (user) {
+      navigate("/");
+    }
+  }, [loginError, user, navigate, dispatch]);
 
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
@@ -37,15 +40,18 @@ const Login = () => {
     dispatch(loginWithGoogle(googleData)).finally(() => setLoading(false));
   };
 
-  if (user) {
-    navigate("/");
-  }
   return (
     <>
       <Container className="login-area">
         {loginError && (
           <div className="error-message">
-            <Alert variant="danger">{loginError}</Alert>
+            <Alert
+              variant="danger"
+              onClose={() => dispatch(clearErrors())}
+              dismissible
+            >
+              {loginError}
+            </Alert>
           </div>
         )}
         <Form className="login-form" onSubmit={handleLoginWithEmail}>
