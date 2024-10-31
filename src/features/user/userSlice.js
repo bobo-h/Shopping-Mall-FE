@@ -6,10 +6,15 @@ import { initialCart } from "../cart/cartSlice";
 
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ email, password }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post("/auth/login", { email, password });
-      // loginPage에서 user가 있으면 홈화면으로 가는 로직 처리 했음
+      dispatch(
+        showToastMessage({
+          message: `${response.data.user.name}님 환영합니다.`,
+          status: "success",
+        })
+      );
       sessionStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
@@ -93,12 +98,14 @@ const userSlice = createSlice({
     builder
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
+        state.registrationError = null;
       })
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
         state.registrationError = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
         state.registrationError = action.payload;
       })
       .addCase(loginWithEmail.pending, (state) => {

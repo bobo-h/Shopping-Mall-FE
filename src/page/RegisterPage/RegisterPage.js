@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-
+import { registerUser, clearErrors } from "../../features/user/userSlice";
 import "./style/register.style.css";
-
-import { registerUser } from "../../features/user/userSlice";
 
 const RegisterPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { registrationError, loading } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({
     email: "",
     name: "",
@@ -16,11 +16,14 @@ const RegisterPage = () => {
     confirmPassword: "",
     policy: false,
   });
-  const navigate = useNavigate();
   const [passwordError, setPasswordError] = useState("");
   const [policyError, setPolicyError] = useState(false);
-  const { registrationError } = useSelector((state) => state.user);
-  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearErrors());
+    };
+  }, [dispatch]);
 
   const register = (event) => {
     event.preventDefault();
@@ -36,14 +39,10 @@ const RegisterPage = () => {
     }
     setPasswordError("");
     setPolicyError(false);
-    setLoading(true);
-    dispatch(registerUser({ name, email, password, navigate })).finally(() =>
-      setLoading(false)
-    );
+    dispatch(registerUser({ name, email, password, navigate }));
   };
 
   const handleChange = (event) => {
-    event.preventDefault();
     let { id, value, type, checked } = event.target;
     if (id === "confirmPassword" && passwordError) setPasswordError("");
     if (type === "checkbox") {
@@ -119,7 +118,13 @@ const RegisterPage = () => {
           />
         </Form.Group>
         <Button variant="danger" type="submit" disabled={loading}>
-          {loading ? <Spinner animation="border" size="sm" /> : "회원가입"}
+          {loading ? (
+            <>
+              <Spinner animation="border" size="sm" /> Loading...
+            </>
+          ) : (
+            "회원가입"
+          )}
         </Button>
       </Form>
     </Container>

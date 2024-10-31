@@ -22,14 +22,13 @@ const InitialFormData = {
 };
 
 const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
-  const { error, success, selectedProduct } = useSelector(
+  const { error, success, selectedProduct, loading } = useSelector(
     (state) => state.product
   );
   const [formData, setFormData] = useState(
     mode === "new" ? { ...InitialFormData } : selectedProduct
   );
   const [stock, setStock] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const [stockError, setStockError] = useState(false);
 
@@ -38,15 +37,11 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
   useEffect(() => {
     if (success) {
       setShowDialog(false);
-      setIsLoading(false);
-    }
-  }, [success]);
-
-  useEffect(() => {
-    if (error || !success) {
-      setIsLoading(false);
       dispatch(clearError());
     }
+  }, [success, setShowDialog, dispatch]);
+
+  useEffect(() => {
     if (showDialog) {
       if (mode === "edit") {
         setFormData(selectedProduct);
@@ -61,24 +56,26 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
         setStock([]);
       }
     }
-  }, [showDialog]);
+  }, [showDialog, mode, selectedProduct]);
 
   const handleClose = () => {
     // 모든걸 초기화시키고;
     // 다이얼로그 닫아주기
-    setIsLoading(false);
     setFormData({ ...InitialFormData });
     setStock([]);
+    dispatch(clearError());
     setShowDialog(false);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsLoading(true);
     console.log("formdata", formData);
     console.log("stockdata", stock);
-    //재고를 입력했는지 확인, 아니면 에러
-    if (stock.length === 0) return setStockError(true);
+    // 재고를 입력했는지 확인, 아니면 에러
+    if (stock.length === 0) {
+      setStockError(true);
+      return;
+    }
     // 재고를 배열에서 객체로 바꿔주기(InitialFormData의 stock과 useState의 stock은 다르다)
     const totalStock = stock.reduce((total, item) => {
       return { ...total, [item[0]]: parseInt(item[1]) };
@@ -91,12 +88,16 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
         await dispatch(createProduct({ ...formData, stock: totalStock }));
       } else {
         // 상품 수정하기
-        await dispatch(editProduct({ ...formData, stock: totalStock }));
+        await dispatch(
+          editProduct({
+            ...formData,
+            stock: totalStock,
+            id: selectedProduct._id,
+          })
+        );
       }
     } catch (error) {
       console.error("Submission error:", error);
-    } finally {
-      setIsLoading(false); // 성공 여부와 관계없이 로딩 상태 중단
     }
   };
 
@@ -322,15 +323,18 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
             </Form.Select>
           </Form.Group>
         </Row>
-        {mode === "new" ? (
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? <Spinner animation="border" size="sm" /> : "Submit"}
-          </Button>
-        ) : (
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading ? <Spinner animation="border" size="sm" /> : "Edit"}
-          </Button>
-        )}
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner animation="border" size="sm" />
+              <span className="visually-hidden">Loading...</span>
+            </>
+          ) : mode === "new" ? (
+            "Create"
+          ) : (
+            "Save Changes"
+          )}
+        </Button>
       </Form>
     </Modal>
   );

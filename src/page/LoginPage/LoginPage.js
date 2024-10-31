@@ -2,42 +2,37 @@ import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { GoogleLogin } from "@react-oauth/google";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import {
+  loginWithEmail,
+  loginWithGoogle,
+  clearErrors,
+} from "../../features/user/userSlice";
 import "./style/login.style.css";
-import { loginWithEmail, loginWithGoogle } from "../../features/user/userSlice";
-import { clearErrors } from "../../features/user/userSlice";
+
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, loginError } = useSelector((state) => state.user);
+  const { user, loginError, loading } = useSelector((state) => state.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (loginError) {
-      setLoading(false); // 로그인 실패 시 로딩 종료
-    }
     if (user) {
       navigate("/");
     }
-  }, [loginError, user, navigate, dispatch]);
+  }, [user, navigate]);
 
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
-    setLoading(true);
-    dispatch(loginWithEmail({ email, password })).finally(() =>
-      setLoading(false)
-    );
+    dispatch(loginWithEmail({ email, password }));
   };
 
   const handleGoogleLogin = async (googleData) => {
-    setLoading(true);
     //구글 로그인 하기
-    dispatch(loginWithGoogle(googleData)).finally(() => setLoading(false));
+    dispatch(loginWithGoogle(googleData));
   };
 
   return (
@@ -76,7 +71,13 @@ const Login = () => {
           </Form.Group>
           <div className="display-space-between login-button-area">
             <Button variant="danger" type="submit" disabled={loading}>
-              {loading ? <Spinner animation="border" size="sm" /> : "Login"}
+              {loading ? (
+                <>
+                  <Spinner animation="border" size="sm" /> Loading...
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
             <div>
               아직 계정이 없으세요?<Link to="/register">회원가입 하기</Link>{" "}

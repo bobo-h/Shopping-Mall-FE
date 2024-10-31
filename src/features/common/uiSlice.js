@@ -18,8 +18,12 @@ const uiSlice = createSlice({
     hideToastMessage(state) {
       state.open = false;
     },
+    clearToastMessage: (state) => {
+      state.toastMessage = null;
+    },
   },
 });
 
-export const { showToastMessage, hideToastMessage } = uiSlice.actions;
+export const { showToastMessage, hideToastMessage, clearToastMessage } =
+  uiSlice.actions;
 export default uiSlice.reducer;

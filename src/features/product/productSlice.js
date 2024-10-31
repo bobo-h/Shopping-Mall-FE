@@ -9,6 +9,7 @@ export const getProductList = createAsyncThunk(
     try {
       const response = await api.get("/product", { params: { ...query } });
       console.log("getProductResponse", response);
+      console.log("totalPageNum:", response.data.totalPageNum);
       if (response.status !== 200) throw new Error(response.error);
       return response.data;
     } catch (error) {
@@ -34,6 +35,7 @@ export const createProduct = createAsyncThunk(
           status: "success",
         })
       );
+      dispatch(getProductList({ page: 1 }));
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -43,12 +45,44 @@ export const createProduct = createAsyncThunk(
 
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id, { dispatch, rejectWithValue }) => {}
+  async (id, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.put(`/product/${id}`);
+      if (response.status !== 200) throw new Error(response.error);
+      dispatch(
+        showToastMessage({
+          message: "상품이 삭제되었습니다.",
+          status: "success",
+        })
+      );
+      // 수정된 값 다시 불러와서 바로 나타내기
+      dispatch(getProductList({ page: 1 }));
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
 );
 
 export const editProduct = createAsyncThunk(
   "products/editProduct",
-  async ({ id, ...formData }, { dispatch, rejectWithValue }) => {}
+  async ({ id, ...formData }, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.put(`/product/${id}`, formData);
+      if (response.status !== 200) throw new Error(response.error);
+      dispatch(
+        showToastMessage({
+          message: "상품이 수정되었습니다.",
+          status: "success",
+        })
+      );
+      // 수정된 값 다시 불러와서 바로 나타내기
+      dispatch(getProductList({ page: 1 }));
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
 );
 
 // 슬라이스 생성
@@ -99,6 +133,29 @@ const productSlice = createSlice({
         state.totalPageNum = action.payload.totalPageNum;
       })
       .addCase(getProductList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(editProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(editProduct.fulfilled, (state) => {
+        state.loading = false;
+        state.error = "";
+        state.success = true;
+      })
+      .addCase(editProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+      })
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteProduct.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
