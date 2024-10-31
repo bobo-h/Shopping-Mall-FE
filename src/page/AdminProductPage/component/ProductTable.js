@@ -17,7 +17,7 @@ const ProductTable = ({ header, data, deleteItem, openEditForm }) => {
         <tbody>
           {data.length > 0 ? (
             data.map((item, index) => (
-              <tr key={index}>
+              <tr key={item._id}>
                 <th>{index}</th>
                 <th>{item.sku}</th>
                 <th style={{ minWidth: "100px" }}>{item.name}</th>
