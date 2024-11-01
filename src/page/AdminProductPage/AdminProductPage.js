@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Modal } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
@@ -18,6 +18,8 @@ const AdminProductPage = () => {
   const dispatch = useDispatch();
   const { productList, totalPageNum } = useSelector((state) => state.product);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     name: query.get("name") || "",
@@ -51,10 +53,20 @@ const AdminProductPage = () => {
 
   const deleteItem = (id) => {
     // 아이템 삭제하기
-    dispatch(deleteProduct(id)).then(() => {
+    setSelectedProductId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    dispatch(deleteProduct(selectedProductId)).then(() => {
       // 삭제 후 최신 검색 조건으로 목록 불러오고 페이지 1로 변경
       setSearchQuery({ ...searchQuery, page: 1 });
+      setShowDeleteModal(false);
     });
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   const openEditForm = (product) => {
@@ -130,7 +142,25 @@ const AdminProductPage = () => {
         mode={mode}
         showDialog={showDialog}
         setShowDialog={setShowDialog}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
+      {showDeleteModal && (
+        <Modal show={showDeleteModal} onHide={cancelDelete}>
+          <Modal.Header closeButton>
+            <Modal.Title>삭제 확인</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>정말 삭제하시겠습니까?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelDelete}>
+              취소
+            </Button>
+            <Button variant="danger" onClick={confirmDelete}>
+              삭제
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </div>
   );
 };

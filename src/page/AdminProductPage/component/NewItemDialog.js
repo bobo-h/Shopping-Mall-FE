@@ -21,7 +21,13 @@ const InitialFormData = {
   price: 0,
 };
 
-const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
+const NewItemDialog = ({
+  mode,
+  showDialog,
+  setShowDialog,
+  searchQuery,
+  setSearchQuery,
+}) => {
   const { error, success, selectedProduct, loading } = useSelector(
     (state) => state.product
   );
@@ -58,7 +64,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
     }
   }, [showDialog, mode, selectedProduct]);
 
-  const handleClose = () => {
+  const handleClose = (product) => {
     // 모든걸 초기화시키고;
     // 다이얼로그 닫아주기
     setFormData({ ...InitialFormData });
@@ -95,6 +101,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
             id: selectedProduct._id,
           })
         );
+        setSearchQuery({ ...searchQuery, page: 1 });
       }
     } catch (error) {
       console.error("Submission error:", error);

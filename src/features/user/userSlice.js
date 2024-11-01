@@ -18,6 +18,12 @@ export const loginWithEmail = createAsyncThunk(
       sessionStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.",
+          status: "error",
+        })
+      );
       // 실패 시 생긴 에러 값을 reducer에 저장
       return rejectWithValue(error.error);
     }
