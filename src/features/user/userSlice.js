@@ -18,12 +18,6 @@ export const loginWithEmail = createAsyncThunk(
       sessionStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.",
-          status: "error",
-        })
-      );
       // 실패 시 생긴 에러 값을 reducer에 저장
       return rejectWithValue(error.error);
     }
@@ -112,7 +106,12 @@ const userSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.registrationError = action.payload;
+        if (!action.payload) {
+          state.loginError =
+            "회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.";
+        } else {
+          state.loginError = action.payload;
+        }
       })
       .addCase(loginWithEmail.pending, (state) => {
         state.loading = true;
@@ -125,6 +124,12 @@ const userSlice = createSlice({
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
+        if (!action.payload) {
+          state.loginError =
+            "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+        } else {
+          state.loginError = action.payload;
+        }
       })
       .addCase(loginWithToken.fulfilled, (state, action) => {
         state.user = action.payload.user;
