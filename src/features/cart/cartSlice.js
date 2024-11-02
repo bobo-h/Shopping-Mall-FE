@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
 import { showToastMessage } from "../common/uiSlice";
+import { incrementCartItemCount } from "../user/userSlice";
 
 // Async thunk actions
 export const addToCart = createAsyncThunk(
@@ -15,6 +16,7 @@ export const addToCart = createAsyncThunk(
           status: "success",
         })
       );
+      dispatch(incrementCartItemCount());
       return response.data.cartItemQty;
     } catch (error) {
       dispatch(
