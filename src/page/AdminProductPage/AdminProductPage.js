@@ -16,7 +16,9 @@ const AdminProductPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();
   const dispatch = useDispatch();
-  const { productList, totalPageNum } = useSelector((state) => state.product);
+  const { productList, totalPageNum, selectedProduct } = useSelector(
+    (state) => state.product
+  );
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -51,9 +53,10 @@ const AdminProductPage = () => {
     dispatch(getProductList({ ...searchQuery }));
   }, [searchQuery, navigate, dispatch]);
 
-  const deleteItem = (id) => {
+  const deleteItem = (product) => {
     // 아이템 삭제하기
-    setSelectedProductId(id);
+    setSelectedProductId(product._id);
+    dispatch(setSelectedProduct(product));
     setShowDeleteModal(true);
   };
 
@@ -62,6 +65,7 @@ const AdminProductPage = () => {
       // 삭제 후 최신 검색 조건으로 목록 불러오고 페이지 1로 변경
       setSearchQuery({ ...searchQuery, page: 1 });
       setShowDeleteModal(false);
+      dispatch(setSelectedProduct(null));
     });
   };
 
@@ -148,9 +152,11 @@ const AdminProductPage = () => {
       {showDeleteModal && (
         <Modal show={showDeleteModal} onHide={cancelDelete}>
           <Modal.Header closeButton>
-            <Modal.Title>삭제 확인</Modal.Title>
+            <Modal.Title>
+              {selectedProduct.sku}, {selectedProduct.name}
+            </Modal.Title>
           </Modal.Header>
-          <Modal.Body>정말 삭제하시겠습니까?</Modal.Body>
+          <Modal.Body>해당 상품을 정말 삭제하시겠습니까?</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={cancelDelete}>
               취소
