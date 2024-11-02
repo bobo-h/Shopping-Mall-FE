@@ -26,22 +26,22 @@ const ProductDetail = () => {
     }
     // 아직 로그인을 안한유저라면 로그인페이지로
     if (!user) {
+      dispatch(
+        showToastMessage({
+          message: "로그인을 먼저 해주세요.",
+          status: "info",
+        })
+      );
       navigate("/login");
       return;
     }
     // 카트에 아이템 추가하기
-    dispatch(addToCart({ product: selectedProduct, size }));
-    dispatch(
-      showToastMessage({
-        message: "상품이 카트에 추가되었습니다.",
-        status: "success",
-      })
-    );
+    dispatch(addToCart({ id, size }));
   };
   const selectSize = (value) => {
-    // 사이즈 추가하기
+    // 에러 리셋하고 사이즈 추가하기
+    if (sizeError) setSizeError(false);
     setSize(value);
-    setSizeError(false);
   };
 
   useEffect(() => {

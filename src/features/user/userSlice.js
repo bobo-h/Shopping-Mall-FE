@@ -36,6 +36,7 @@ export const logout = () => (dispatch) => {
     showToastMessage({ message: "로그아웃 되었습니다.", status: "info" })
   );
 };
+
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (
@@ -55,7 +56,7 @@ export const registerUser = createAsyncThunk(
     } catch (error) {
       dispatch(
         showToastMessage({
-          message: "회원가입에 실패헸습니다.",
+          message: "회원가입에 실패했습니다.",
           status: "error",
         })
       );
