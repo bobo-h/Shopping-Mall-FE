@@ -85,7 +85,6 @@ const userSlice = createSlice({
     loginError: null,
     registrationError: null,
     success: false,
-    cartItemCount: 0,
   },
   reducers: {
     clearErrors: (state) => {
@@ -94,10 +93,6 @@ const userSlice = createSlice({
     },
     clearUser: (state) => {
       state.user = null;
-      state.cartItemCount = 0;
-    },
-    incrementCartItemCount: (state) => {
-      state.cartItemCount += 1;
     },
   },
   extraReducers: (builder) => {
@@ -126,7 +121,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.loginError = null;
-        state.cartItemCount = action.payload.cartItemQty;
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
@@ -140,10 +134,8 @@ const userSlice = createSlice({
       })
       .addCase(loginWithToken.fulfilled, (state, action) => {
         state.user = action.payload.user;
-        state.cartItemCount = action.payload.cartItemQty;
       });
   },
 });
-export const { clearErrors, clearUser, incrementCartItemCount } =
-  userSlice.actions;
+export const { clearErrors, clearUser } = userSlice.actions;
 export default userSlice.reducer;

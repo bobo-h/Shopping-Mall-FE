@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
 import { showToastMessage } from "../common/uiSlice";
-import { incrementCartItemCount } from "../user/userSlice";
 
 // Async thunk actions
 export const addToCart = createAsyncThunk(
@@ -16,12 +15,11 @@ export const addToCart = createAsyncThunk(
           status: "success",
         })
       );
-      dispatch(incrementCartItemCount());
       return response.data.cartItemQty;
     } catch (error) {
       dispatch(
         showToastMessage({
-          message: "상품을 다시 담아주세요(이미담긴제품)",
+          message: "이미 담긴 상품입니다",
           status: "error",
         })
       );
@@ -55,7 +53,16 @@ export const updateQty = createAsyncThunk(
 
 export const getCartQty = createAsyncThunk(
   "cart/getCartQty",
-  async (_, { rejectWithValue, dispatch }) => {}
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.get("/cart/qty");
+      if (response.status !== 200) throw new Error(response.error);
+      return response.data.qty;
+    } catch (error) {
+      dispatch(showToastMessage({ message: error.message, status: "error" }));
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 const cartSlice = createSlice({
@@ -101,6 +108,18 @@ const cartSlice = createSlice({
         );
       })
       .addCase(getCartList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getCartQty.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getCartQty.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = "";
+        state.cartItemCount = action.payload;
+      })
+      .addCase(getCartQty.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
