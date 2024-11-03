@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Container, Row, Col, Button, Dropdown } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Dropdown,
+  Spinner,
+} from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ColorRing } from "react-loader-spinner";
 import { currencyFormat } from "../../utils/number";
@@ -12,6 +19,7 @@ import { showToastMessage } from "../../features/common/uiSlice";
 const ProductDetail = () => {
   const dispatch = useDispatch();
   const { selectedProduct, loading } = useSelector((state) => state.product);
+  const { loading: cartLoading } = useSelector((state) => state.cart);
   const [size, setSize] = useState("");
   const { id } = useParams();
   const [sizeError, setSizeError] = useState(false);
@@ -112,7 +120,13 @@ const ProductDetail = () => {
             {sizeError && "사이즈를 선택해주세요."}
           </div>
           <Button variant="dark" className="add-button" onClick={addItemToCart}>
-            추가
+            {cartLoading ? (
+              <>
+                <Spinner animation="border" size="sm" /> Loading...
+              </>
+            ) : (
+              "추가"
+            )}
           </Button>
         </Col>
       </Row>
