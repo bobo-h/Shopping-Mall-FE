@@ -43,12 +43,34 @@ export const getCartList = createAsyncThunk(
 
 export const deleteCartItem = createAsyncThunk(
   "cart/deleteCartItem",
-  async (id, { rejectWithValue, dispatch }) => {}
+  async (id, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.delete(`/cart/${id}`);
+      if (response.status !== 200) throw new Error(response.error);
+      dispatch(
+        showToastMessage({
+          message: "카트에서 상품이 삭제되었습니다",
+          status: "success",
+        })
+      );
+      dispatch(getCartList());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 export const updateQty = createAsyncThunk(
   "cart/updateQty",
-  async ({ id, value }, { rejectWithValue }) => {}
+  async ({ id, value }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/cart/${id}`, { qty: value });
+      if (response.status !== 200) throw new Error(response.error);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 export const getCartQty = createAsyncThunk(
@@ -79,7 +101,9 @@ const cartSlice = createSlice({
     initialCart: (state) => {
       state.cartItemCount = 0;
     },
-    // You can still add reducers here for non-async actions if necessary
+    setSelectedItem: (state, action) => {
+      state.selectedItem = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -102,6 +126,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = "";
         state.cartList = action.payload;
+        state.cartItemCount = action.payload.length;
         state.totalPrice = action.payload.reduce(
           (total, item) => total + item.productId.price * item.qty,
           0
@@ -122,9 +147,36 @@ const cartSlice = createSlice({
       .addCase(getCartQty.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(deleteCartItem.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteCartItem.fulfilled, (state) => {
+        state.loading = false;
+        state.error = "";
+      })
+      .addCase(deleteCartItem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateQty.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateQty.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = "";
+        state.cartList = action.payload;
+        state.totalPrice = action.payload.reduce(
+          (total, item) => total + item.productId.price * item.qty,
+          0
+        );
+      })
+      .addCase(updateQty.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
 export default cartSlice.reducer;
-export const { initialCart } = cartSlice.actions;
+export const { initialCart, setSelectedItem } = cartSlice.actions;

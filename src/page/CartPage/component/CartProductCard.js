@@ -1,19 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { Row, Col, Form } from "react-bootstrap";
+import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { currencyFormat } from "../../../utils/number";
-import { updateQty, deleteCartItem } from "../../../features/cart/cartSlice";
+import {
+  updateQty,
+  deleteCartItem,
+  setSelectedItem,
+} from "../../../features/cart/cartSlice";
+
 const CartProductCard = ({ item }) => {
   const dispatch = useDispatch();
+  const { selectedItem } = useSelector((state) => state.cart);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleQtyChange = (id, value) => {
     dispatch(updateQty({ id, value }));
   };
 
-  const deleteCart = (id) => {
-    dispatch(deleteCartItem(id));
+  const handleDeleteClick = (item) => {
+    dispatch(setSelectedItem(item));
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    dispatch(deleteCartItem(selectedItem._id));
+    setShowDeleteModal(false);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -25,12 +42,11 @@ const CartProductCard = ({ item }) => {
         <Col md={10} xs={12}>
           <div className="display-flex space-between">
             <h3>{item.productId.name}</h3>
-            <button className="trash-button">
-              <FontAwesomeIcon
-                icon={faTrash}
-                width={24}
-                onClick={() => deleteCart(item._id)}
-              />
+            <button
+              className="trash-button"
+              onClick={() => handleDeleteClick(item)}
+            >
+              <FontAwesomeIcon icon={faTrash} width={24} />
             </button>
           </div>
 
@@ -63,6 +79,22 @@ const CartProductCard = ({ item }) => {
           </div>
         </Col>
       </Row>
+      <Modal show={showDeleteModal} onHide={cancelDelete}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedItem?.productId?.name || "Selected Item"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>해당 상품을 장바구니에서 삭제하시겠습니다?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancelDelete}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
