@@ -32,6 +32,7 @@ export const loginWithGoogle = createAsyncThunk(
 export const logout = () => (dispatch) => {
   sessionStorage.removeItem("token");
   dispatch(userSlice.actions.clearUser());
+  dispatch(initialCart());
   dispatch(
     showToastMessage({ message: "로그아웃 되었습니다.", status: "info" })
   );
