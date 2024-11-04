@@ -22,6 +22,12 @@ export const createOrder = createAsyncThunk(
       if (response.status !== 200) throw new Error(response.error);
       return response.data.orderNum;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: error.error,
+          status: "error",
+        })
+      );
       return rejectWithValue(error.error);
     }
   }
