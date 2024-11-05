@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
 import OrderReceipt from "./component/OrderReceipt";
@@ -11,7 +11,7 @@ import { createOrder } from "../../features/order/orderSlice";
 const PaymentPage = () => {
   const dispatch = useDispatch();
   const { cartList, totalPrice } = useSelector((state) => state.cart);
-  const { orderNum } = useSelector((state) => state.order);
+  const { orderNum, loading } = useSelector((state) => state.order);
   const [cardValue, setCardValue] = useState({
     cvc: "",
     expiry: "",
@@ -20,7 +20,6 @@ const PaymentPage = () => {
     number: "",
   });
   const navigate = useNavigate();
-  const [firstLoading, setFirstLoading] = useState(true);
   const [shipInfo, setShipInfo] = useState({
     firstName: "",
     lastName: "",
@@ -31,8 +30,11 @@ const PaymentPage = () => {
   });
 
   useEffect(() => {
-    // 오더번호를 받으면 어디로 갈까?
-  }, [orderNum]);
+    // 주문 완료 후 받은 오더번호를 표시해주는 오더 성공페이지로 가기
+    if (orderNum !== "") {
+      navigate("/payment/success");
+    }
+  }, [orderNum, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -167,7 +169,13 @@ const PaymentPage = () => {
                   className="payment-button pay-button"
                   type="submit"
                 >
-                  결제하기
+                  {loading ? (
+                    <>
+                      <Spinner animation="border" size="sm" /> Loading...
+                    </>
+                  ) : (
+                    "결제하기"
+                  )}
                 </Button>
               </Form>
             </div>

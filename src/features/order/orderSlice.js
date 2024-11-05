@@ -3,16 +3,6 @@ import { getCartQty } from "../cart/cartSlice";
 import api from "../../utils/api";
 import { showToastMessage } from "../common/uiSlice";
 
-// Define initial state
-const initialState = {
-  orderList: [],
-  orderNum: "",
-  selectedOrder: {},
-  error: "",
-  loading: false,
-  totalPageNum: 1,
-};
-
 // Async thunks
 export const createOrder = createAsyncThunk(
   "order/createOrder",
@@ -20,6 +10,13 @@ export const createOrder = createAsyncThunk(
     try {
       const response = await api.post("/order", payload);
       if (response.status !== 200) throw new Error(response.error);
+      dispatch(getCartQty());
+      dispatch(
+        showToastMessage({
+          message: "주문 완료",
+          status: "success",
+        })
+      );
       return response.data.orderNum;
     } catch (error) {
       dispatch(
@@ -51,10 +48,20 @@ export const updateOrder = createAsyncThunk(
 // Order slice
 const orderSlice = createSlice({
   name: "order",
-  initialState,
+  initialState: {
+    orderList: [],
+    orderNum: "",
+    selectedOrder: {},
+    error: "",
+    loading: false,
+    totalPageNum: 1,
+  },
   reducers: {
     setSelectedOrder: (state, action) => {
       state.selectedOrder = action.payload;
+    },
+    resetOrder: (state) => {
+      state.orderNum = "";
     },
   },
   extraReducers: (builder) => {
@@ -74,5 +81,5 @@ const orderSlice = createSlice({
   },
 });
 
-export const { setSelectedOrder } = orderSlice.actions;
+export const { setSelectedOrder, resetOrder } = orderSlice.actions;
 export default orderSlice.reducer;

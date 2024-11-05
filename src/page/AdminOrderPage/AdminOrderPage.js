@@ -36,7 +36,7 @@ const AdminOrderPage = () => {
 
   useEffect(() => {
     dispatch(getOrderList({ ...searchQuery }));
-  }, [query]);
+  }, [dispatch, searchQuery]);
 
   useEffect(() => {
     if (searchQuery.ordernum === "") {
@@ -46,7 +46,7 @@ const AdminOrderPage = () => {
     const queryString = params.toString();
 
     navigate("?" + queryString);
-  }, [searchQuery]);
+  }, [searchQuery, navigate]);
 
   const openEditForm = (order) => {
     setOpen(true);
