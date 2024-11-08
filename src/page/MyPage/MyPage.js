@@ -9,7 +9,9 @@ import { getOrder } from "../../features/order/orderSlice";
 const MyPage = () => {
   const dispatch = useDispatch();
   const { orderList } = useSelector((state) => state.order);
+
   console.log(orderList);
+
   useEffect(() => {
     dispatch(getOrder());
   }, [dispatch]);
