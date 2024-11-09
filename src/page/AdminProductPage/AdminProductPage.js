@@ -8,7 +8,9 @@ import NewItemDialog from "./component/NewItemDialog";
 import ProductTable from "./component/ProductTable";
 import {
   getProductList,
+  getDeletedProductList,
   deleteProduct,
+  restoreProduct,
   setSelectedProduct,
 } from "../../features/product/productSlice";
 
@@ -16,17 +18,22 @@ const AdminProductPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();
   const dispatch = useDispatch();
-  const { productList, totalPageNum, selectedProduct } = useSelector(
-    (state) => state.product
-  );
+  const {
+    productList,
+    deletedProductList,
+    totalPageNum,
+    deletedTotalPageNum,
+    selectedProduct,
+  } = useSelector((state) => state.product);
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     name: query.get("name") || "",
   }); //검색 조건들을 저장하는 객체
-
+  const [showDeletedProducts, setShowDeletedProducts] = useState(false);
   const [mode, setMode] = useState("new");
 
   const tableHeader = [
@@ -50,8 +57,13 @@ const AdminProductPage = () => {
     console.log("query", query);
     navigate("?" + query);
     // 상품리스트 가져오기 (url쿼리 맞춰서)
-    dispatch(getProductList({ ...searchQuery }));
-  }, [searchQuery, navigate, dispatch]);
+
+    if (showDeletedProducts) {
+      dispatch(getDeletedProductList({ ...searchQuery }));
+    } else {
+      dispatch(getProductList({ ...searchQuery }));
+    }
+  }, [searchQuery, showDeletedProducts, navigate, dispatch]);
 
   const deleteItem = (product) => {
     // 아이템 삭제하기
@@ -98,6 +110,29 @@ const AdminProductPage = () => {
   // => searchQuery 객체 안의 아이템 기준으로 url을 새로 생성해서 호출 ex: $name=jacket
   // => url쿼리 읽어오기 => 쿼리 기준으로 BE 검색 조건과 함께 호출
 
+  const toggleDeletedProducts = () => {
+    setShowDeletedProducts(!showDeletedProducts);
+    setSearchQuery({ ...searchQuery, page: 1 });
+  };
+
+  const restoreItem = (product) => {
+    setSelectedProductId(product._id);
+    dispatch(setSelectedProduct(product));
+    setShowRestoreModal(true);
+  };
+
+  const confirmRestore = () => {
+    dispatch(restoreProduct(selectedProductId)).then(() => {
+      setSearchQuery({ ...searchQuery, page: 1 });
+      setShowRestoreModal(false);
+      dispatch(setSelectedProduct(null));
+    });
+  };
+
+  const cancelRestore = () => {
+    setShowRestoreModal(false);
+  };
+
   return (
     <div className="locate-center">
       <Container>
@@ -112,18 +147,29 @@ const AdminProductPage = () => {
         <Button className="mt-2 mb-2" onClick={handleClickNewItem}>
           Add New Item +
         </Button>
+        <Button
+          className="mt-2 mb-2 ml-2"
+          variant={showDeletedProducts ? "secondary" : "warning"}
+          onClick={toggleDeletedProducts}
+        >
+          {showDeletedProducts
+            ? "Show Active Products"
+            : "Show Deleted Products"}
+        </Button>
 
         <ProductTable
           header={tableHeader}
-          data={productList}
+          data={showDeletedProducts ? deletedProductList : productList}
           deleteItem={deleteItem}
           openEditForm={openEditForm}
+          isDeletedList={showDeletedProducts}
+          restoreItem={restoreItem}
         />
         <ReactPaginate
           nextLabel="next >"
           onPageChange={handlePageClick}
           pageRangeDisplayed={5}
-          pageCount={totalPageNum}
+          pageCount={showDeletedProducts ? deletedTotalPageNum : totalPageNum}
           forcePage={searchQuery.page - 1}
           previousLabel="< previous"
           renderOnZeroPageCount={null}
@@ -149,6 +195,7 @@ const AdminProductPage = () => {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
+
       {showDeleteModal && (
         <Modal show={showDeleteModal} onHide={cancelDelete}>
           <Modal.Header closeButton>
@@ -163,6 +210,25 @@ const AdminProductPage = () => {
             </Button>
             <Button variant="danger" onClick={confirmDelete}>
               삭제
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
+      {showRestoreModal && (
+        <Modal show={showRestoreModal} onHide={cancelRestore}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {selectedProduct.sku}, {selectedProduct.name}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>해당 상품을 정말 복원하시겠습니까?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelRestore}>
+              취소
+            </Button>
+            <Button variant="success" onClick={confirmRestore}>
+              복원
             </Button>
           </Modal.Footer>
         </Modal>

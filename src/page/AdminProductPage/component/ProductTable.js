@@ -3,7 +3,14 @@ import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import { currencyFormat } from "../../../utils/number";
 
-const ProductTable = ({ header, data, deleteItem, openEditForm }) => {
+const ProductTable = ({
+  header,
+  data,
+  deleteItem,
+  openEditForm,
+  isDeletedList,
+  restoreItem,
+}) => {
   return (
     <div className="overflow-x">
       <Table striped bordered hover>
@@ -34,17 +41,29 @@ const ProductTable = ({ header, data, deleteItem, openEditForm }) => {
                 </th>
                 <th>{item.status}</th>
                 <th style={{ minWidth: "100px" }}>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => deleteItem(item)}
-                    className="mr-1"
-                  >
-                    -
-                  </Button>
-                  <Button size="sm" onClick={() => openEditForm(item)}>
-                    Edit
-                  </Button>
+                  {isDeletedList ? (
+                    <Button
+                      size="sm"
+                      variant="success"
+                      onClick={() => restoreItem(item)}
+                    >
+                      Restore
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => deleteItem(item)}
+                        className="mr-1"
+                      >
+                        -
+                      </Button>
+                      <Button size="sm" onClick={() => openEditForm(item)}>
+                        Edit
+                      </Button>
+                    </>
+                  )}
                 </th>
               </tr>
             ))

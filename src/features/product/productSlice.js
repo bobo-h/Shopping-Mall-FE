@@ -96,15 +96,52 @@ export const editProduct = createAsyncThunk(
   }
 );
 
+export const getDeletedProductList = createAsyncThunk(
+  "products/getDeletedProductList",
+  async (query, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/product/deletedProducts", {
+        params: { ...query },
+      });
+      if (response.status !== 200) throw new Error(response.error);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const restoreProduct = createAsyncThunk(
+  "products/restoreProduct",
+  async (id, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/product/restore/${id}`);
+      if (response.status !== 200) throw new Error(response.error);
+      dispatch(
+        showToastMessage({
+          message: "상품이 복구되었습니다.",
+          status: "success",
+        })
+      );
+      dispatch(getDeletedProductList({ page: 1 }));
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // 슬라이스 생성
 const productSlice = createSlice({
   name: "products",
   initialState: {
     productList: [],
+    deletedProductList: [],
     selectedProduct: null,
     loading: false,
     error: "",
     totalPageNum: 1,
+    deletedTotalPageNum: 1,
     success: false,
   },
   reducers: {
@@ -182,6 +219,29 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.selectedProduct = null;
+      })
+      .addCase(getDeletedProductList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getDeletedProductList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.deletedProductList = action.payload.data;
+        state.deletedTotalPageNum = action.payload.totalPageNum;
+      })
+      .addCase(getDeletedProductList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(restoreProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(restoreProduct.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(restoreProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
