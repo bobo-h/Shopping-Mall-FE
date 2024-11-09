@@ -32,7 +32,7 @@ const AdminProductPage = () => {
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     name: query.get("name") || "",
-  }); //검색 조건들을 저장하는 객체
+  });
   const [showDeletedProducts, setShowDeletedProducts] = useState(false);
   const [mode, setMode] = useState("new");
 
@@ -48,15 +48,12 @@ const AdminProductPage = () => {
   ];
 
   useEffect(() => {
-    // 검색어나 페이지가 바뀌면 url바꿔주기 (검색어또는 페이지가 바뀜 => url 바꿔줌=> url쿼리 읽어옴=> 이 쿼리값 맞춰서  상품리스트 가져오기)
     if (searchQuery.name === "") {
       delete searchQuery.name;
     }
     const params = new URLSearchParams(searchQuery);
     const query = params.toString();
-    console.log("query", query);
     navigate("?" + query);
-    // 상품리스트 가져오기 (url쿼리 맞춰서)
 
     if (showDeletedProducts) {
       dispatch(getDeletedProductList({ ...searchQuery }));
@@ -66,7 +63,6 @@ const AdminProductPage = () => {
   }, [searchQuery, showDeletedProducts, navigate, dispatch]);
 
   const deleteItem = (product) => {
-    // 아이템 삭제하기
     setSelectedProductId(product._id);
     dispatch(setSelectedProduct(product));
     setShowDeleteModal(true);
@@ -74,7 +70,6 @@ const AdminProductPage = () => {
 
   const confirmDelete = () => {
     dispatch(deleteProduct(selectedProductId)).then(() => {
-      // 삭제 후 최신 검색 조건으로 목록 불러오고 페이지 1로 변경
       setSearchQuery({ ...searchQuery, page: 1 });
       setShowDeleteModal(false);
       dispatch(setSelectedProduct(null));
@@ -86,29 +81,19 @@ const AdminProductPage = () => {
   };
 
   const openEditForm = (product) => {
-    // edit모드로 설정하고
     setMode("edit");
-    // 클릭한 아이템 정보 불러오기
     dispatch(setSelectedProduct(product));
-    // 아이템 수정다이얼로그 열어주기
     setShowDialog(true);
   };
 
   const handleClickNewItem = () => {
-    // new 모드로 설정하고
     setMode("new");
-    // 다이얼로그 열어주기
     setShowDialog(true);
   };
 
   const handlePageClick = ({ selected }) => {
-    // 쿼리에 페이지값 바꿔주기
     setSearchQuery({ ...searchQuery, page: selected + 1 });
   };
-  // 검색 매커니즘
-  // searchBox에서 검색어를 읽어온다 => 엔터를 치면 => searchQuery객체가 업데이트가 된다. ex:{name: jacket}
-  // => searchQuery 객체 안의 아이템 기준으로 url을 새로 생성해서 호출 ex: $name=jacket
-  // => url쿼리 읽어오기 => 쿼리 기준으로 BE 검색 조건과 함께 호출
 
   const toggleDeletedProducts = () => {
     setShowDeletedProducts(!showDeletedProducts);
@@ -222,7 +207,7 @@ const AdminProductPage = () => {
               {selectedProduct.sku}, {selectedProduct.name}
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body>해당 상품을 정말 복원하시겠습니까?</Modal.Body>
+          <Modal.Body>해당 상품을 복원하시겠습니까?</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={cancelRestore}>
               취소

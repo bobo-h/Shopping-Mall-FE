@@ -30,7 +30,6 @@ const PaymentPage = () => {
   });
 
   useEffect(() => {
-    // 주문 완료 후 받은 오더번호를 표시해주는 오더 성공페이지로 가기
     if (orderNum !== "") {
       navigate("/payment/success");
     }
@@ -38,7 +37,6 @@ const PaymentPage = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // 오더 생성하기
     const { firstName, lastName, contact, address, city, zip } = shipInfo;
     dispatch(
       createOrder({
@@ -58,13 +56,11 @@ const PaymentPage = () => {
   };
 
   const handleFormChange = (event) => {
-    // shipInfo에 값 넣어주기
     const { name, value } = event.target;
     setShipInfo({ ...shipInfo, [name]: value });
   };
 
   const handlePaymentInfoChange = (event) => {
-    // 카드정보 넣어주기
     const { name, value } = event.target;
     if (name === "expiry") {
       let newValue = cc_expires_format(value);
@@ -78,7 +74,6 @@ const PaymentPage = () => {
     setCardValue({ ...cardValue, focus: e.target.name });
   };
 
-  // 주문할 아이템이 없다면 주문하기로 안넘어가게 막기
   if (cartList?.length === 0) {
     navigate("/cart");
   }

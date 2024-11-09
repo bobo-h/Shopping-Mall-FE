@@ -18,7 +18,6 @@ export const loginWithEmail = createAsyncThunk(
       sessionStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
-      // 실패 시 생긴 에러 값을 reducer에 저장
       return rejectWithValue(error.error);
     }
   }
@@ -29,7 +28,6 @@ export const loginWithGoogle = createAsyncThunk(
   async (token, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post("/auth/google", { token });
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: `${response.data.user.name}님 환영합니다.`,

@@ -3,13 +3,11 @@ import { getCartQty } from "../cart/cartSlice";
 import api from "../../utils/api";
 import { showToastMessage } from "../common/uiSlice";
 
-// Async thunks
 export const createOrder = createAsyncThunk(
   "order/createOrder",
   async (payload, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post("/order", payload);
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(getCartQty());
       dispatch(
         showToastMessage({
@@ -32,10 +30,9 @@ export const createOrder = createAsyncThunk(
 
 export const getOrder = createAsyncThunk(
   "order/getOrder",
-  async (_, { rejectWithValue, dispatch }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/order/me");
-      if (response.status !== 200) throw new Error(response.error);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -45,10 +42,9 @@ export const getOrder = createAsyncThunk(
 
 export const getOrderList = createAsyncThunk(
   "order/getOrderList",
-  async (query, { rejectWithValue, dispatch }) => {
+  async (query, { rejectWithValue }) => {
     try {
       const response = await api.get("/order", { params: { ...query } });
-      if (response.status !== 200) throw new Error(response.error);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -61,20 +57,19 @@ export const updateOrder = createAsyncThunk(
   async ({ id, status }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.put(`/order/${id}`, { status });
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: "주문 수정이 완료되었습니다.",
           status: "success",
         })
       );
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.error);
     }
   }
 );
 
-// Order slice
 const orderSlice = createSlice({
   name: "order",
   initialState: {

@@ -39,9 +39,8 @@ const Navbar = ({ user }) => {
   };
   const handleLogout = () => {
     if (user) {
-      // user가 존재할 때만 로그아웃 실행
       dispatch(logout());
-      navigate("/"); // 로그아웃 후 메인 화면으로 리다이렉트 하여 불필요한 인증 요청 방지
+      navigate("/");
     }
   };
   return (
@@ -139,7 +138,7 @@ const Navbar = ({ user }) => {
             </li>
           ))}
         </ul>
-        {!isMobile && ( // admin페이지에서 같은 search-box스타일을 쓰고있음 그래서 여기서 서치박스 안보이는것 처리를 해줌
+        {!isMobile && (
           <div className="search-box landing-search-box ">
             <FontAwesomeIcon icon={faSearch} />
             <input

@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
 import { showToastMessage } from "../common/uiSlice";
 
-// 비동기 액션 생성
 export const getProductList = createAsyncThunk(
   "products/getProductList",
   async (query, { rejectWithValue }) => {
@@ -10,9 +9,6 @@ export const getProductList = createAsyncThunk(
       const response = await api.get("/product", {
         params: { ...query, isDeleted: false },
       });
-      console.log("getProductResponse", response);
-      console.log("totalPageNum:", response.data.totalPageNum);
-      if (response.status !== 200) throw new Error(response.error);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -25,7 +21,6 @@ export const getProductDetail = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.get(`/product/${id}`);
-      if (response.status !== 200) throw new Error(response.error);
       return response.data.product;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -38,7 +33,6 @@ export const createProduct = createAsyncThunk(
   async (formData, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post("/product", formData);
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: "상품이 생성되었습니다.",
@@ -58,15 +52,12 @@ export const deleteProduct = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.delete(`/product/${id}`);
-      console.log("deleteProductResponse", response);
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: "상품이 삭제되었습니다.",
           status: "success",
         })
       );
-      // 수정된 값 다시 불러와서 바로 나타내기
       dispatch(getProductList({ page: 1 }));
       return response.data.data;
     } catch (error) {
@@ -80,14 +71,12 @@ export const editProduct = createAsyncThunk(
   async ({ id, ...formData }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.put(`/product/${id}`, formData);
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: "상품이 수정되었습니다.",
           status: "success",
         })
       );
-      // 수정된 값 다시 불러와서 바로 나타내기
       dispatch(getProductList({ page: 1 }));
       return response.data.data;
     } catch (error) {
@@ -103,7 +92,6 @@ export const getDeletedProductList = createAsyncThunk(
       const response = await api.get("/product/deletedProducts", {
         params: { ...query },
       });
-      if (response.status !== 200) throw new Error(response.error);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -116,7 +104,6 @@ export const restoreProduct = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.patch(`/product/restore/${id}`);
-      if (response.status !== 200) throw new Error(response.error);
       dispatch(
         showToastMessage({
           message: "상품이 복구되었습니다.",
@@ -131,7 +118,6 @@ export const restoreProduct = createAsyncThunk(
   }
 );
 
-// 슬라이스 생성
 const productSlice = createSlice({
   name: "products",
   initialState: {

@@ -11,7 +11,6 @@ const OrderCompletePage = () => {
 
   useEffect(() => {
     return () => {
-      // 페이지 벗어날 때 초기화
       dispatch(resetOrder());
     };
   }, [dispatch]);

@@ -21,7 +21,7 @@ class CloudinaryUploadWidget extends Component {
             .setAttribute("src", result.info.secure_url);
           this.props.uploadImage(result.info.secure_url);
         }
-      } //https://cloudinary.com/documentation/react_image_and_video_upload
+      }
     );
     document.getElementById("upload_widget").addEventListener(
       "click",

@@ -85,7 +85,7 @@ const CartProductCard = ({ item }) => {
             {selectedItem?.productId?.name || "Selected Item"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>해당 상품을 장바구니에서 삭제하시겠습니다?</Modal.Body>
+        <Modal.Body>해당 상품을 장바구니에서 삭제하시겠습니까?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelDelete}>
             Cancel
