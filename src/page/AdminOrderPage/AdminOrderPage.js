@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import ReactPaginate from "react-paginate";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -16,7 +16,9 @@ const AdminOrderPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();
   const dispatch = useDispatch();
-  const { orderList, totalPageNum } = useSelector((state) => state.order);
+  const { orderList, totalPageNum, loading } = useSelector(
+    (state) => state.order
+  );
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     ordernum: query.get("ordernum") || "",
@@ -72,33 +74,46 @@ const AdminOrderPage = () => {
             field="ordernum"
           />
         </div>
-
-        <OrderTable
-          header={tableHeader}
-          data={orderList}
-          openEditForm={openEditForm}
-        />
-        <ReactPaginate
-          nextLabel="next >"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={5}
-          pageCount={totalPageNum}
-          forcePage={searchQuery.page - 1}
-          previousLabel="< previous"
-          renderOnZeroPageCount={null}
-          pageClassName="page-item"
-          pageLinkClassName="page-link"
-          previousClassName="page-item"
-          previousLinkClassName="page-link"
-          nextClassName="page-item"
-          nextLinkClassName="page-link"
-          breakLabel="..."
-          breakClassName="page-item"
-          breakLinkClassName="page-link"
-          containerClassName="pagination"
-          activeClassName="active"
-          className="display-center list-style-none"
-        />
+        {loading ? (
+          <div className="text-center w-100 my-5">
+            <Spinner
+              animation="border"
+              role="status"
+              style={{ width: "4rem", height: "4rem", color: "#1abc9c" }}
+            >
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        ) : (
+          <>
+            <OrderTable
+              header={tableHeader}
+              data={orderList}
+              openEditForm={openEditForm}
+            />
+            <ReactPaginate
+              nextLabel="next >"
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              pageCount={totalPageNum}
+              forcePage={searchQuery.page - 1}
+              previousLabel="< previous"
+              renderOnZeroPageCount={null}
+              pageClassName="page-item"
+              pageLinkClassName="page-link"
+              previousClassName="page-item"
+              previousLinkClassName="page-link"
+              nextClassName="page-item"
+              nextLinkClassName="page-link"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="page-link"
+              containerClassName="pagination"
+              activeClassName="active"
+              className="display-center list-style-none"
+            />
+          </>
+        )}
       </Container>
 
       {open && (

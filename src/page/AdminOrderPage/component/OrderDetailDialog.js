@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Form, Modal, Button, Col, Table } from "react-bootstrap";
+import { Form, Modal, Button, Col, Table, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ORDER_STATUS } from "../../../constants/order.constants";
 import { currencyFormat } from "../../../utils/number";
 import { updateOrder, getOrderList } from "../../../features/order/orderSlice";
 
 const OrderDetailDialog = ({ open, handleClose, searchQuery }) => {
-  const selectedOrder = useSelector((state) => state.order.selectedOrder);
+  const { selectedOrder, loading } = useSelector((state) => state.order);
   const [orderStatus, setOrderStatus] = useState(selectedOrder.status);
   const dispatch = useDispatch();
 
@@ -83,14 +83,22 @@ const OrderDetailDialog = ({ open, handleClose, searchQuery }) => {
             </Form.Select>
           </Form.Group>
           <div className="order-button-area">
-            <Button
-              variant="light"
-              onClick={handleClose}
-              className="order-button"
-            >
-              닫기
-            </Button>
-            <Button type="submit">저장</Button>
+            {loading ? (
+              <Button type="submit">
+                <Spinner animation="border" size="sm" /> Loading...
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="light"
+                  onClick={handleClose}
+                  className="order-button"
+                >
+                  닫기
+                </Button>
+                <Button type="submit">저장</Button>
+              </>
+            )}
           </div>
         </Form>
       </Modal.Body>
