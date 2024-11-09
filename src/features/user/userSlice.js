@@ -26,7 +26,22 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => {}
+  async (token, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.post("/auth/google", { token });
+      if (response.status !== 200) throw new Error(response.error);
+      dispatch(
+        showToastMessage({
+          message: `${response.data.user.name}님 환영합니다.`,
+          status: "success",
+        })
+      );
+      sessionStorage.setItem("token", response.data.token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
 );
 
 export const logout = () => (dispatch) => {
@@ -135,6 +150,24 @@ const userSlice = createSlice({
       })
       .addCase(loginWithToken.fulfilled, (state, action) => {
         state.user = action.payload.user;
+      })
+      .addCase(loginWithGoogle.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.loginError = null;
+      })
+      .addCase(loginWithGoogle.rejected, (state, action) => {
+        state.loading = false;
+        state.loginError = action.payload;
+        if (!action.payload) {
+          state.loginError =
+            "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+        } else {
+          state.loginError = action.payload;
+        }
       });
   },
 });
